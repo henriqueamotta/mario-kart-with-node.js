@@ -254,9 +254,30 @@ function printScoreboard(character1, character2) {
     );
 }
 
+// Renderizador de tabela próprio: console.table sempre acrescenta uma coluna
+// "(index)" e envolve valores em aspas simples, sem opção de desligar isso.
+function renderTable(rows) {
+    const columns = Object.keys(rows[0]);
+    const widths = columns.map((column) =>
+        Math.max(column.length, ...rows.map((row) => String(row[column]).length))
+    );
+
+    const renderRow = (cells) =>
+        `│ ${cells.map((cell, i) => String(cell).padEnd(widths[i])).join(" │ ")} │`;
+
+    const renderSeparator = (left, mid, right) =>
+        left + widths.map((width) => "─".repeat(width + 2)).join(mid) + right;
+
+    const lines = [renderSeparator("┌", "┬", "┐"), renderRow(columns), renderSeparator("├", "┼", "┤")];
+    rows.forEach((row) => lines.push(renderRow(columns.map((column) => row[column]))));
+    lines.push(renderSeparator("└", "┴", "┘"));
+
+    return lines.join("\n");
+}
+
 function printRaceHistory(history) {
     console.log("\n📋 Histórico da corrida:");
-    console.table(history);
+    console.log(renderTable(history));
 }
 
 async function playRaceEngine(character1, character2, totalRounds) {
@@ -288,10 +309,10 @@ async function playRaceEngine(character1, character2, totalRounds) {
         history.push({
             Rodada: round,
             Bloco: block,
-            [character1.NOME]: result.detail1,
-            [character2.NOME]: result.detail2,
+            [`${character1.NOME} ${character1.ICONE}`]: result.detail1,
+            [`${character2.NOME} ${character2.ICONE}`]: result.detail2,
             Resultado: result.outcome,
-            Placar: `${character1.PONTOS} x ${character2.PONTOS}`,
+            Placar: `${character1.ICONE} ${character1.PONTOS} x ${character2.PONTOS} ${character2.ICONE}`,
         });
     }
 
