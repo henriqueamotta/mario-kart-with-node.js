@@ -176,7 +176,7 @@ function resolvePowerClash(character1, character2) {
     const loser = powerResult1 > powerResult2 ? character2 : character1;
 
     if (loser.PONTOS > 0) {
-        console.log(`${formatCharacterName(winner)} venceu o confronto! ${formatCharacterName(loser)} perde 1 ponto 🐢.`);
+        console.log(`${formatCharacterName(winner)} venceu o confronto! ${formatCharacterName(loser)} perde 1 ponto ⚠️.`);
         loser.PONTOS--;
     } else {
         console.log(`${formatCharacterName(winner)} venceu o confronto! ${formatCharacterName(loser)} já está com 0 pontos, ninguém perde pontos.`);
