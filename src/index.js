@@ -3,6 +3,16 @@ const readline = require("node:readline");
 const DICE_SIDES = 6;
 const ROUND_OPTIONS = [5, 9, 13];
 
+const ROUND_PAUSE_MS = 900;
+const DICE_ANIMATION_FRAMES = 8;
+const DICE_ANIMATION_FRAME_MS = 70;
+const COUNTDOWN_STEPS = ["3...", "2...", "1...", "Largada! 🏁"];
+const COUNTDOWN_STEP_MS = 700;
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const BLOCKS = {
     RETA: "RETA",
     CURVA: "CURVA",
@@ -137,6 +147,29 @@ function rollDice() {
     return Math.floor(Math.random() * DICE_SIDES) + 1;
 }
 
+// Pisca valores aleatórios na mesma linha antes de revelar o resultado final,
+// simulando o dado girando (suspense). O "\r" só sobrescreve a linha em um
+// terminal interativo (TTY); em saída redirecionada/pipe isso viraria uma
+// sequência de linhas coladas, então nesse caso pulamos direto para o resultado.
+async function rollDiceAnimated(characterName) {
+    if (!process.stdout.isTTY) {
+        console.log(`${characterName} rolando o dado 🎲...`);
+        await sleep(DICE_ANIMATION_FRAMES * DICE_ANIMATION_FRAME_MS);
+        const result = rollDice();
+        console.log(`${characterName} rolou o dado 🎲: ${result}`);
+        return result;
+    }
+
+    for (let frame = 0; frame < DICE_ANIMATION_FRAMES; frame++) {
+        process.stdout.write(`\r${characterName} rolando o dado 🎲... ${rollDice()}`);
+        await sleep(DICE_ANIMATION_FRAME_MS);
+    }
+
+    const result = rollDice();
+    process.stdout.write(`\r${characterName} rolou o dado 🎲: ${result}      \n`);
+    return result;
+}
+
 function getRandomBlock() {
     const random = Math.random();
 
@@ -150,15 +183,17 @@ function logRollResult(characterName, block, diceResult, attribute) {
 }
 
 // RETA e CURVA compartilham a mesma regra: dado + atributo, maior soma marca ponto.
-function resolveSkillCheck(character1, character2, block, attributeKey) {
-    const diceResult1 = rollDice();
-    const diceResult2 = rollDice();
+async function resolveSkillCheck(character1, character2, block, attributeKey) {
+    const diceResult1 = await rollDiceAnimated(formatCharacterName(character1));
+    const diceResult2 = await rollDiceAnimated(formatCharacterName(character2));
 
     const total1 = character1[attributeKey] + diceResult1;
     const total2 = character2[attributeKey] + diceResult2;
 
     logRollResult(formatCharacterName(character1), block, diceResult1, character1[attributeKey]);
     logRollResult(formatCharacterName(character2), block, diceResult2, character2[attributeKey]);
+
+    await sleep(ROUND_PAUSE_MS);
 
     if (total1 > total2) {
         console.log(`${formatCharacterName(character1)} marcou um ponto!`);
@@ -170,17 +205,19 @@ function resolveSkillCheck(character1, character2, block, attributeKey) {
 }
 
 // CONFRONTO tem regra própria: quem perde o confronto perde 1 ponto (nunca abaixo de 0).
-function resolvePowerClash(character1, character2) {
-    const diceResult1 = rollDice();
-    const diceResult2 = rollDice();
+async function resolvePowerClash(character1, character2) {
+    console.log(`${formatCharacterName(character1)} confrontou ${formatCharacterName(character2)}! 🥊`);
+
+    const diceResult1 = await rollDiceAnimated(formatCharacterName(character1));
+    const diceResult2 = await rollDiceAnimated(formatCharacterName(character2));
 
     const powerResult1 = character1.PODER + diceResult1;
     const powerResult2 = character2.PODER + diceResult2;
 
-    console.log(`${formatCharacterName(character1)} confrontou ${formatCharacterName(character2)}! 🥊`);
-
     logRollResult(formatCharacterName(character1), BLOCKS.CONFRONTO, diceResult1, character1.PODER);
     logRollResult(formatCharacterName(character2), BLOCKS.CONFRONTO, diceResult2, character2.PODER);
+
+    await sleep(ROUND_PAUSE_MS);
 
     if (powerResult1 === powerResult2) {
         console.log("Empate no confronto! Ninguém perde pontos.");
@@ -198,25 +235,35 @@ function resolvePowerClash(character1, character2) {
     }
 }
 
-function playRaceEngine(character1, character2, totalRounds) {
+function printScoreboard(character1, character2) {
+    const bar1 = "▓".repeat(character1.PONTOS) || "·";
+    const bar2 = "▓".repeat(character2.PONTOS) || "·";
+    console.log(
+        `Placar: ${formatCharacterName(character1)} ${bar1} (${character1.PONTOS})  |  ${formatCharacterName(character2)} ${bar2} (${character2.PONTOS})`
+    );
+}
+
+async function playRaceEngine(character1, character2, totalRounds) {
     for (let round = 1; round <= totalRounds; round++) {
         console.log(`\n🏁 Rodada ${round}`);
 
         const block = getRandomBlock();
         console.log(`Bloco: ${block}`);
+        await sleep(ROUND_PAUSE_MS / 2);
 
         if (block === BLOCKS.RETA) {
-            resolveSkillCheck(character1, character2, block, "VELOCIDADE");
+            await resolveSkillCheck(character1, character2, block, "VELOCIDADE");
         }
 
         if (block === BLOCKS.CURVA) {
-            resolveSkillCheck(character1, character2, block, "MANOBRABILIDADE");
+            await resolveSkillCheck(character1, character2, block, "MANOBRABILIDADE");
         }
 
         if (block === BLOCKS.CONFRONTO) {
-            resolvePowerClash(character1, character2);
+            await resolvePowerClash(character1, character2);
         }
 
+        printScoreboard(character1, character2);
         console.log("_____________________________");
     }
 }
@@ -248,6 +295,11 @@ function declareWinner(character1, character2) {
     console.log(
         `\n🏁🚦 Corrida entre ${formatCharacterName(player1)} e ${formatCharacterName(player2)} começando... (${totalRounds} rodadas)`);
 
-    playRaceEngine(player1, player2, totalRounds);
+    for (const step of COUNTDOWN_STEPS) {
+        console.log(step);
+        await sleep(COUNTDOWN_STEP_MS);
+    }
+
+    await playRaceEngine(player1, player2, totalRounds);
     declareWinner(player1, player2);
 })();
