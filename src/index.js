@@ -1,7 +1,7 @@
 const DICE_SIDES = 6;
 const TOTAL_ROUNDS = 5;
 
-const BLOCOS = {
+const BLOCKS = {
     RETA: "RETA",
     CURVA: "CURVA",
     CONFRONTO: "CONFRONTO",
@@ -31,9 +31,9 @@ function rollDice() {
 function getRandomBlock() {
     const random = Math.random();
 
-    if (random < 1 / 3) return BLOCOS.RETA;
-    if (random < 2 / 3) return BLOCOS.CURVA;
-    return BLOCOS.CONFRONTO;
+    if (random < 1 / 3) return BLOCKS.RETA;
+    if (random < 2 / 3) return BLOCKS.CURVA;
+    return BLOCKS.CONFRONTO;
 }
 
 function logRollResult(characterName, block, diceResult, attribute) {
@@ -70,8 +70,8 @@ function resolvePowerClash(character1, character2) {
 
     console.log(`${character1.NOME} confrontou ${character2.NOME}! 🥊`);
 
-    logRollResult(character1.NOME, BLOCOS.CONFRONTO, diceResult1, character1.PODER);
-    logRollResult(character2.NOME, BLOCOS.CONFRONTO, diceResult2, character2.PODER);
+    logRollResult(character1.NOME, BLOCKS.CONFRONTO, diceResult1, character1.PODER);
+    logRollResult(character2.NOME, BLOCKS.CONFRONTO, diceResult2, character2.PODER);
 
     if (powerResult1 === powerResult2) {
         console.log("Empate no confronto! Ninguém perde pontos.");
@@ -96,15 +96,15 @@ function playRaceEngine(character1, character2) {
         const block = getRandomBlock();
         console.log(`Bloco: ${block}`);
 
-        if (block === BLOCOS.RETA) {
+        if (block === BLOCKS.RETA) {
             resolveSkillCheck(character1, character2, block, "VELOCIDADE");
         }
 
-        if (block === BLOCOS.CURVA) {
+        if (block === BLOCKS.CURVA) {
             resolveSkillCheck(character1, character2, block, "MANOBRABILIDADE");
         }
 
-        if (block === BLOCOS.CONFRONTO) {
+        if (block === BLOCKS.CONFRONTO) {
             resolvePowerClash(character1, character2);
         }
 
