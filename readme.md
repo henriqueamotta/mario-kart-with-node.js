@@ -12,92 +12,56 @@
         </tr>
     </table>
 
-<h2>Players</h2>
-      <table style="border-collapse: collapse; width: 800px; margin: 0 auto;">
-        <tr>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Mario</p>
-                <img src="./docs/mario.gif" alt="Mario Kart" width="60" height="60">
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Velocidade: 4</p>
-                <p>Manobrabilidade: 3</p>
-                <p>Poder: 3</p>
-            </td>
-             <td style="border: 1px solid black; text-align: center;">
-                <p>Peach</p>
-                <img src="./docs/peach.gif" alt="Mario Kart" width="60" height="60">
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Velocidade: 3</p>
-                <p>Manobrabilidade: 4</p>
-                <p>Poder: 2</p>
-            </td>
-              <td style="border: 1px solid black; text-align: center;">
-                <p>Yoshi</p>
-                <img src="./docs/yoshi.gif" alt="Mario Kart" width="60" height="60">
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Velocidade: 2</p>
-                <p>Manobrabilidade: 4</p>
-                <p>Poder: 3</p>
-            </td>
-        </tr>
-        <tr>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Bowser</p>
-                <img src="./docs/bowser.gif" alt="Mario Kart" width="60" height="60">
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Velocidade: 5</p>
-                <p>Manobrabilidade: 2</p>
-                <p>Poder: 5</p>
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Luigi</p>
-                <img src="./docs/luigi.gif" alt="Mario Kart" width="60" height="60">
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Velocidade: 3</p>
-                <p>Manobrabilidade: 4</p>
-                <p>Poder: 4</p>
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Donkey Kong</p>
-                <img src="./docs/dk.gif" alt="Mario Kart" width="60" height="60">
-            </td>
-            <td style="border: 1px solid black; text-align: center;">
-                <p>Velocidade: 2</p>
-                <p>Manobrabilidade: 2</p>
-                <p>Poder: 5</p>
-            </td>
-        </tr>
-    </table>
+*Este projeto foi desenvolvido com ajuda do Claude Code.*
 
-<p></p>
+## Como jogar
 
-<br>
-<h3>🕹️ Regras & mecânicas:</h3>
+O jogo roda direto no terminal, sem instalação de dependências:
 
-<br>
-<b>Jogadores:</b>
+```bash
+node src/index.js
+```
 
-<label for="jogadores-item">O Computador deve receber dois personagens para disputar a corrida em um objeto cada</label>
+ou, usando o script do `package.json`:
 
-<br>
-<b>Pistas:</b>
-<ul>
-  <li><label for="pistas-1-item">Os personagens irão correr em uma pista aleatória de 5 rodadas</label></li>
-  <li><label for="pistas-2-item">A cada rodada, será sorteado um bloco da pista que pode ser uma reta, curva ou confronto</label>
-    <ul>
-      <li><label for="pistas-2-1-item">Caso o bloco da pista seja uma RETA, o jogador deve jogar um dado de 6 lados e somar o atributo VELOCIDADE, quem vencer ganha um ponto</label></li>
-      <li><label for="pistas-2-2-item">Caso o bloco da pista seja uma CURVA, o jogador deve jogar um dado de 6 lados e somar o atributo MANOBRABILIDADE, quem vencer ganha um ponto</label></li>
-      <li><label for="pistas-2-3-item">Caso o bloco da pista seja um CONFRONTO, o jogador deve jogar um dado de 6 lados e somar o atributo PODER, quem perder, perde um ponto</label></li>
-      <li><label for="pistas-2-3-item">Nenhum jogador pode ter pontuação negativa (valores abaixo de 0)</label></li>
-    </ul>
-  </li>
-</ul>
-<br>
-<b>Condição de vitória:</b>
+```bash
+npm start
+```
 
-<label for="vitoria-item">Ao final, vence quem acumulou mais pontos</label>
+O jogo então conduz você por um menu interativo:
+
+1. Escolha do modo de jogo: **1x1** (dois jogadores humanos) ou **1xCPU** (você contra o computador, que apenas sorteia seu personagem — sem nenhuma decisão estratégica durante a corrida)
+2. Escolha de personagem para cada jogador (o computador nunca repete um personagem já escolhido)
+3. Escolha da quantidade de rodadas da corrida: 5, 9 ou 13
+
+## Players
+
+| Personagem       | Velocidade | Manobrabilidade | Poder |
+|-------------------|:----------:|:----------------:|:-----:|
+| 🔴 Mario          | 4          | 3                | 3     |
+| 🟢 Luigi          | 3          | 4                | 4     |
+| 🍑 Peach          | 3          | 4                | 2     |
+| 🍄 Toad           | 5          | 3                | 1     |
+| 🦖 Yoshi          | 2          | 4                | 3     |
+| 🐢 Bowser         | 5          | 2                | 5     |
+| 🦍 Donkey Kong    | 2          | 2                | 5     |
+| 🐚 Koopa Troopa   | 3          | 5                | 2     |
+
+## 🕹️ Regras & mecânicas
+
+**Jogadores:**
+
+Dois personagens disputam a corrida, escolhidos no início da partida via terminal — em 1x1 os dois são escolhidos por pessoas, em 1xCPU o segundo é sorteado automaticamente entre os personagens restantes.
+
+**Pistas:**
+
+- Os personagens correm por uma pista aleatória com 5, 9 ou 13 rodadas (escolhido no início da partida)
+- A cada rodada, será sorteado um bloco da pista que pode ser uma reta, curva ou confronto
+  - Caso o bloco da pista seja uma **RETA**, o jogador deve jogar um dado de 6 lados e somar o atributo VELOCIDADE, quem vencer ganha um ponto
+  - Caso o bloco da pista seja uma **CURVA**, o jogador deve jogar um dado de 6 lados e somar o atributo MANOBRABILIDADE, quem vencer ganha um ponto
+  - Caso o bloco da pista seja um **CONFRONTO**, o jogador deve jogar um dado de 6 lados e somar o atributo PODER, quem perder, perde um ponto
+  - Nenhum jogador pode ter pontuação negativa (valores abaixo de 0)
+
+**Condição de vitória:**
+
+Ao final, vence quem acumulou mais pontos. Um placar visual acompanha cada rodada, e um histórico completo da corrida é exibido em forma de tabela antes do resultado final.

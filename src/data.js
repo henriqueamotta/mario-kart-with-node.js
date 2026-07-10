@@ -12,6 +12,7 @@ const CHARACTERS = [
     { NOME: "Yoshi", ICONE: "🦖", VELOCIDADE: 2, MANOBRABILIDADE: 4, PODER: 3 },
     { NOME: "Bowser", ICONE: "🐢", VELOCIDADE: 5, MANOBRABILIDADE: 2, PODER: 5 },
     { NOME: "Donkey Kong", ICONE: "🦍", VELOCIDADE: 2, MANOBRABILIDADE: 2, PODER: 5 },
+    { NOME: "Koopa Troopa", ICONE: "🐚", VELOCIDADE: 3, MANOBRABILIDADE: 5, PODER: 2 },
 ];
 
 const DICE_SIDES = 6;
