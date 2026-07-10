@@ -1,7 +1,7 @@
 const readline = require("node:readline");
 
 const DICE_SIDES = 6;
-const TOTAL_ROUNDS = 5;
+const ROUND_OPTIONS = [5, 9, 13];
 
 const BLOCKS = {
     RETA: "RETA",
@@ -95,6 +95,21 @@ function pickRandomCharacter(availableCharacters) {
     return availableCharacters[index];
 }
 
+async function promptRoundCount(ask) {
+    const optionsLabel = ROUND_OPTIONS.join("/");
+
+    while (true) {
+        const answer = (await ask(`\nQuantas rodadas? (${optionsLabel}): `)).trim();
+        const roundCount = Number(answer);
+
+        if (ROUND_OPTIONS.includes(roundCount)) {
+            return roundCount;
+        }
+
+        console.log(`Opção inválida. Escolha entre ${optionsLabel}.`);
+    }
+}
+
 // CPU não toma decisões estratégicas: apenas sorteia o personagem entre os restantes.
 async function selectRacers(ask) {
     const gameMode = await promptGameMode(ask);
@@ -183,8 +198,8 @@ function resolvePowerClash(character1, character2) {
     }
 }
 
-function playRaceEngine(character1, character2) {
-    for (let round = 1; round <= TOTAL_ROUNDS; round++) {
+function playRaceEngine(character1, character2, totalRounds) {
+    for (let round = 1; round <= totalRounds; round++) {
         console.log(`\n🏁 Rodada ${round}`);
 
         const block = getRandomBlock();
@@ -227,11 +242,12 @@ function declareWinner(character1, character2) {
     console.log("🏁🚦 Bem-vindo ao Mario Kart!");
 
     const { player1, player2 } = await selectRacers(ask);
+    const totalRounds = await promptRoundCount(ask);
     rl.close();
 
     console.log(
-        `\n🏁🚦 Corrida entre ${formatCharacterName(player1)} e ${formatCharacterName(player2)} começando...`);
+        `\n🏁🚦 Corrida entre ${formatCharacterName(player1)} e ${formatCharacterName(player2)} começando... (${totalRounds} rodadas)`);
 
-    playRaceEngine(player1, player2);
+    playRaceEngine(player1, player2, totalRounds);
     declareWinner(player1, player2);
 })();
