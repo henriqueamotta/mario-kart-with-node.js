@@ -5,7 +5,7 @@ const ROUND_OPTIONS = [5, 9, 13];
 
 const ROUND_PAUSE_MS = 900;
 const DICE_ANIMATION_FRAMES = 8;
-const DICE_ANIMATION_FRAME_MS = 70;
+const DICE_ANIMATION_FRAME_MS = 180;
 const COUNTDOWN_STEPS = ["3...", "2...", "1...", "Largada! 🏁"];
 const COUNTDOWN_STEP_MS = 700;
 
