@@ -1,3 +1,5 @@
+const readline = require("node:readline");
+
 const DICE_SIDES = 6;
 const TOTAL_ROUNDS = 5;
 
@@ -18,18 +20,102 @@ const CHARACTERS = [
 ];
 
 // Cria uma cópia do personagem com PONTOS zerado, evitando compartilhar estado entre corridas.
-function createRacer(characterName) {
-    const template = CHARACTERS.find((character) => character.NOME === characterName);
-    return { ...template, PONTOS: 0 };
+function createRacer(characterTemplate) {
+    return { ...characterTemplate, PONTOS: 0 };
 }
 
 function formatCharacterName(character) {
     return `${character.ICONE} ${character.NOME}`;
 }
 
-// Seleção de personagem ainda é fixa (Fase 2 introduz escolha via terminal).
-const player1 = createRacer("Mario");
-const player2 = createRacer("Luigi");
+// rl.question() perde linhas quando o stdin chega em lote (ex: pipe/non-TTY),
+// porque o listener "line" só é anexado depois que o evento já disparou.
+// Uma fila de linhas persistente evita essa perda.
+function createPrompter(rl) {
+    const queue = [];
+    let pendingResolve = null;
+
+    rl.on("line", (line) => {
+        if (pendingResolve) {
+            pendingResolve(line);
+            pendingResolve = null;
+        } else {
+            queue.push(line);
+        }
+    });
+
+    return function ask(question) {
+        process.stdout.write(question);
+        if (queue.length > 0) return Promise.resolve(queue.shift());
+        return new Promise((resolve) => {
+            pendingResolve = resolve;
+        });
+    };
+}
+
+async function promptGameMode(ask) {
+    while (true) {
+        const answer = (await ask(
+            "\nEscolha o modo de jogo:\n1 - 1x1 (dois jogadores)\n2 - 1xCPU (contra o computador)\n> "
+        )).trim();
+
+        if (answer === "1") return "1x1";
+        if (answer === "2") return "1xCPU";
+
+        console.log("Opção inválida. Digite 1 ou 2.");
+    }
+}
+
+function listAvailableCharacters(availableCharacters) {
+    availableCharacters.forEach((character, index) => {
+        console.log(
+            `${index + 1} - ${formatCharacterName(character)} (VELOCIDADE: ${character.VELOCIDADE}, MANOBRABILIDADE: ${character.MANOBRABILIDADE}, PODER: ${character.PODER})`
+        );
+    });
+}
+
+async function promptCharacterChoice(ask, playerLabel, availableCharacters) {
+    console.log(`\nPersonagens disponíveis para ${playerLabel}:`);
+    listAvailableCharacters(availableCharacters);
+
+    while (true) {
+        const answer = (await ask("Escolha o número do personagem: ")).trim();
+        const index = Number(answer) - 1;
+
+        if (Number.isInteger(index) && index >= 0 && index < availableCharacters.length) {
+            return availableCharacters[index];
+        }
+
+        console.log("Opção inválida. Tente novamente.");
+    }
+}
+
+function pickRandomCharacter(availableCharacters) {
+    const index = Math.floor(Math.random() * availableCharacters.length);
+    return availableCharacters[index];
+}
+
+// CPU não toma decisões estratégicas: apenas sorteia o personagem entre os restantes.
+async function selectRacers(ask) {
+    const gameMode = await promptGameMode(ask);
+    const availableCharacters = [...CHARACTERS];
+
+    const character1Template = await promptCharacterChoice(ask, "Jogador 1", availableCharacters);
+    availableCharacters.splice(availableCharacters.indexOf(character1Template), 1);
+
+    let character2Template;
+    if (gameMode === "1x1") {
+        character2Template = await promptCharacterChoice(ask, "Jogador 2", availableCharacters);
+    } else {
+        character2Template = pickRandomCharacter(availableCharacters);
+        console.log(`\nCPU escolheu ${formatCharacterName(character2Template)}!`);
+    }
+
+    return {
+        player1: createRacer(character1Template),
+        player2: createRacer(character2Template),
+    };
+}
 
 // Função para simular o lançamento do dado
 function rollDice() {
@@ -134,9 +220,17 @@ function declareWinner(character1, character2) {
     }
 }
 
-(function main() {
+(async function main() {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const ask = createPrompter(rl);
+
+    console.log("🏁🚦 Bem-vindo ao Mario Kart!");
+
+    const { player1, player2 } = await selectRacers(ask);
+    rl.close();
+
     console.log(
-        `🏁🚦 Corrida entre ${formatCharacterName(player1)} e ${formatCharacterName(player2)} começando...`);
+        `\n🏁🚦 Corrida entre ${formatCharacterName(player1)} e ${formatCharacterName(player2)} começando...`);
 
     playRaceEngine(player1, player2);
     declareWinner(player1, player2);
